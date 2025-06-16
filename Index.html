@@ -1,0 +1,30 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Debate</title>
+</head>
+<body>
+  <h1>AI Debate Arena</h1>
+  <input id="topic" placeholder="Enter a topic...">
+  <button onclick="startDebate()">Start Debate</button>
+  <div id="responses"></div>
+
+  <script>
+    async function startDebate() {
+      const topic = document.getElementById("topic").value;
+      const response = await fetch("YOUR_BACKEND_API_URL/api/debate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic })
+      });
+      const result = await response.json();
+      document.getElementById("responses").innerHTML = `
+        <p><strong>GPT-4:</strong> ${result.gpt4}</p>
+        <p><strong>Claude:</strong> ${result.claude}</p>
+        <p><strong>Winner:</strong> ${result.verdict}</p>
+      `;
+    }
+  </script>
+</body>
+</html>
