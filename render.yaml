@@ -1,0 +1,18 @@
+services:
+  # Frontend - Static Site
+  - type: web
+    name: ai-fight-club-frontend
+    env: static
+    staticPublishPath: .
+    routes:
+      - path: /*
+        dest: /Index.html
+
+  # Backend - Web Service
+  - type: web
+    name: ai-fight-club-backend
+    env: node
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "node server.js"
+    healthCheckPath: "/"
