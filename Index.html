@@ -1,30 +1,161 @@
-<!-- index.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>AI Debate</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Fight Club</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: #1e1e1e;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+        p {
+            color: #b0b0b0;
+            margin-bottom: 2rem;
+        }
+        .topic-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #252525;
+            color: #e0e0e0;
+            font-size: 1rem;
+        }
+        .ai-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .ai-selector label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .debate-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+            text-align: left;
+        }
+        .response-card {
+            background: #252525;
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+        .response-card h3 {
+            margin-top: 0;
+            color: #ffffff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 0.5rem;
+        }
+    </style>
 </head>
 <body>
-  <h1>AI Debate Arena</h1>
-  <input id="topic" placeholder="Enter a topic...">
-  <button onclick="startDebate()">Start Debate</button>
-  <div id="responses"></div>
+    <div class="container">
+        <h1>🥊 AI Fight Club</h1>
+        <p>"Two LLMs enter. One leaves."</p>
 
-  <script>
-    async function startDebate() {
-      const topic = document.getElementById("topic").value;
-      const response = await fetch("YOUR_BACKEND_API_URL/api/debate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic })
-      });
-      const result = await response.json();
-      document.getElementById("responses").innerHTML = `
-        <p><strong>GPT-4:</strong> ${result.gpt4}</p>
-        <p><strong>Claude:</strong> ${result.claude}</p>
-        <p><strong>Winner:</strong> ${result.verdict}</p>
-      `;
-    }
-  </script>
+        <textarea id="topic" class="topic-input" rows="3" placeholder="Enter a debate topic... (e.g., 'Is pineapple on pizza a crime?')"></textarea>
+
+        <div class="ai-selector">
+            <label><input type="checkbox" name="ai" value="gpt-4" checked> GPT-4</label>
+            <label><input type="checkbox" name="ai" value="claude-3" checked> Claude 3</label>
+            <label><input type="checkbox" name="ai" value="gemini-pro"> Gemini Pro</label>
+        </div>
+
+        <button class="btn" onclick="startDebate()">Start Debate</button>
+
+        <div id="responses" class="debate-grid"></div>
+    </div>
+
+    <script>
+        async function startDebate() {
+            const topic = document.getElementById('topic').value;
+            const selectedAIs = Array.from(document.querySelectorAll('input[name="ai"]:checked')).map(el => el.value);
+
+            if (!topic) {
+                alert("Please enter a topic!");
+                return;
+            }
+            if (selectedAIs.length < 2) {
+                alert("Please select at least two AIs for a debate!");
+                return;
+            }
+
+            const responsesDiv = document.getElementById('responses');
+            responsesDiv.innerHTML = '<h2>Loading...</h2>';
+
+            const BACKEND_API_URL = 'http://localhost:3000/api/debate';
+
+            try {
+                const response = await fetch(BACKEND_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ topic, ais: selectedAIs }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const results = await response.json();
+
+                responsesDiv.innerHTML = '';
+                for (const ai in results) {
+                    const card = document.createElement('div');
+                    card.className = 'response-card';
+                    card.innerHTML = `
+                        <h3>${ai.toUpperCase()}</h3>
+                        <p>${results[ai]}</p>
+                    `;
+                    responsesDiv.appendChild(card);
+                }
+
+            } catch (error) {
+                responsesDiv.innerHTML = '<p>Error fetching debate responses. Make sure your backend is running.</p>';
+                console.error('Error:', error);
+            }
+        }
+    </script>
 </body>
 </html>
